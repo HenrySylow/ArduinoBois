@@ -30,6 +30,7 @@ int SpeedDifference = 0;
 int RestSpeed = 0;
 float den;
 float num;
+unsigned long timer;
 
 void setup() {
      //IR sensors`
@@ -54,25 +55,24 @@ void setup() {
 void loop() { 
 
 distance_mm = sonar_mm();  
-  if(state = 0){
+  if(state == 0){
     LineFollowing();
   }
-  if(distance_mm < 50){
+  /*if(distance_mm < 50){
     analogWrite(5,0);
     analogWrite(6,0);
     //delay(5000);
     state = 1;
-  }
-  if ( state = 1){
+  }*/
+  if ( state == 1){
     Wall_to_Turn();
   }
-  if(state = 2){
+  if(state == 2){
     Where_the_fuck_is_the_line();
   }
-  
+  if (state == 4){
+    stoppystate();
+  }
     
   
 }
-
-
-
