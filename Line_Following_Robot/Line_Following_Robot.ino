@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <SparkFun_APDS9960.h>
 #include <ENGG1500Lib.h>
+#include <Servo.h>
 
  /*
  State 0 = Line Following
@@ -46,6 +47,10 @@ uint16_t red_light = 0;
 uint16_t green_light = 0;
 uint16_t blue_light = 0;
 
+//Servo Setup
+Servo myservo;  // create servo object to control a servo
+int pos = 90;    // variable to store the servo position
+
 void setup() {
      //IR sensors`
      pinMode(A0, INPUT);//IR front
@@ -68,12 +73,7 @@ void setup() {
      pinMode(TRIG, OUTPUT);
 
      //Servo 
-     //pinMode();
-     //pinMode();
-
-     //RGB Sensor
-     //pinMode();
-     //pinMode();
+     myservo.attach(4);  //Attaches the servo on pin 4 to the servo object
 
      //Check for RGB working
 
@@ -92,29 +92,45 @@ void setup() {
 }
 void loop() { 
 
+//Important Criteria
 distance_mm = sonar_mm();
 
-  /*if(distance_mm < 50){
+//Transition Criteria
+
+  if(distance_mm < 50){
     analogWrite(5,0);
     analogWrite(6,0);
     //delay(5000);
     state = 1;
-  }*/
+  }
+ 
   if(red_light >= 200) {
     state = 7;
   }
+
+
+//States
+
   if(state == 0){
-    LineFollowing();
+    Line_Following();
   }
-  if ( state == 1){
+  
+  if (state == 1){
     Wall_to_Turn();
   }
+  
   if(state == 2){
-    Where_the_fuck_is_the_line();
+    Lost_Line();
   }
+
+  if(state == 3){
+    Corridor_or_Turn();
+  }
+  
   if (state == 4){
-    stoppystate();
+    Garage();
   }
+  
   if (state == 7) {
     Gate();
   }
