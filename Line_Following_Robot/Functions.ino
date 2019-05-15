@@ -1,3 +1,4 @@
+
 void LineFollowing() {
      
      leftForwards();
@@ -52,16 +53,45 @@ void Wall_to_Turn() {
   analogWrite(5, RestSpeed);
   analogWrite(6, RestSpeed);
   delay(100);
-  state = 1;
-   
-  
+  state = 0;
 }
 
+void Gate() {
 
+  /*// Read the light levels (ambient, red, green, blue)
+  if (  !apds.readAmbientLight(ambient_light) ||
+        !apds.readRedLight(red_light) ||
+        !apds.readGreenLight(green_light) ||
+        !apds.readBlueLight(blue_light) ) {
+    Serial.println("Error reading light values");
+  } else {
+    Serial.print("Ambient: ");
+    Serial.print(ambient_light);
+    Serial.print(" Red: ");
+    Serial.print(red_light);
+    Serial.print(" Green: ");
+    Serial.print(green_light);
+    Serial.print(" Blue: ");
+    Serial.println(blue_light);
+  }
+  
+  // Wait 1 second before next reading
+  delay(1000);*/
+
+  if(red_light >= 200 && green_light <= 100 && blue_light <= 100){ 
+    analogWrite(5, 0);
+    analogWrite(6, 0);
+  }
+  
+  if(red_light <= 100 && green_light >= 200 && blue_light <=100) {
+
+    delay(1500);
+    state = 0;
+  }
+}
 
 /*
  THINGS TO_DO:
-
  SHARP CORNER
  
  STOP IN THE SHED
@@ -166,4 +196,8 @@ void stoppystate() {
   analogWrite(5,0);
 }
 
- 
+
+
+
+
+
