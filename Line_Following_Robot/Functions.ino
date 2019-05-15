@@ -9,23 +9,12 @@ void LineFollowing() {
      num=(w1*x1) + (w2*x2) + (w3*x3) + (w4*x4);
      den= w1 + w2 + w3 + w4;
      LineDistance = num/den;
-     SpeedDifference = LineDistance*7;
-     /*Serial.print("Num: ");
-     Serial.println(num);
-     Serial.print("Den: ");
-     Serial.println(den);
-     Serial.print("w1 ");
-     Serial.println(w1);
-     Serial.print("w2 ");
-     Serial.println(w2);
-     Serial.print("w3 ");
-     Serial.println(w3);
-     Serial.print("w4 ");
-     Serial.println(w4);*/
-     if (den<180){
+     SpeedDifference = LineDistance*6;
+     
+     if (den<140){
       unsigned long current_time=millis();
-      unsigned long timer = current_time + 2000;
-      State = 2;// State is where the fuck is the line function;      
+      timer = current_time + 1000;
+      state = 2;// State is where the fuck is the line function;      
      }
      if(SpeedDifference<0){
           SpeedDifference = -SpeedDifference;
@@ -63,7 +52,7 @@ void Wall_to_Turn() {
   analogWrite(5, RestSpeed);
   analogWrite(6, RestSpeed);
   delay(100);
-  State = 1;
+  state = 1;
    
   
 }
@@ -130,21 +119,21 @@ void Where_the_fuck_is_the_line() {
      num=(w1*x1) + (w2*x2) + (w3*x3) + (w4*x4);
      den= w1 + w2 + w3 + w4;
      LineDistance = num/den;
-     SpeedDifference = LineDistance*7;
-     /*Serial.print("Num: ");
-     Serial.println(num);
-     Serial.print("Den: ");
-     Serial.println(den);
-     Serial.print("w1 ");
-     Serial.println(w1);
-     Serial.print("w2 ");
-     Serial.println(w2);
-     Serial.print("w3 ");
-     Serial.println(w3);
-     Serial.print("w4 ");
-     Serial.println(w4);*/
-     if (den<180 && millis()>timer){
-//          state = 4;             
+     SpeedDifference = LineDistance*6;
+    // Serial.print("Num: ");
+    // Serial.println(num);
+    // Serial.print("Den: ");
+    //Serial.println(den);
+    // Serial.print("w1 ");
+    // Serial.println(w1);
+   //  Serial.print("w2 ");
+   //  Serial.println(w2);
+   //  Serial.print("w3 ");
+   //  Serial.println(w3);
+   //  Serial.print("w4 ");
+   //  Serial.println(w4);
+     if (den<140 && millis()>timer){
+          state = 4;            
      }
      if(SpeedDifference<0){
           SpeedDifference = -SpeedDifference;
@@ -169,10 +158,12 @@ void Where_the_fuck_is_the_line() {
 
 }
 
+void stoppystate() {
+
+  leftForwards();
+  rightForwards();
+  analogWrite(6,0);
+  analogWrite(5,0);
+}
+
  
-
-
-
-
-
-
