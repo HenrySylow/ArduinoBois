@@ -1,6 +1,46 @@
 
-void LineFollowing() {
-     
+//void LineFollowing() {
+//     leftForwards();
+//     rightForwards(); 
+//     w1 = analogRead(A0);
+//     w2 = analogRead(A1);
+//     w3 = analogRead(A2);
+//     w4 = analogRead(A3);
+//     num=(w1*x1) + (w2*x2) + (w3*x3) + (w4*x4);
+//     den= w1 + w2 + w3 + w4;
+//     LineDistance = num/den;
+//     SpeedDifference = LineDistance*6;
+//     
+//     if (den<140){
+//      unsigned long current_time=millis();
+//      timer0 = current_time + 1500;
+//      state = 2;// State is where the fuck is the line function;      
+//     }
+//     if(SpeedDifference<0){
+//          SpeedDifference = -SpeedDifference;
+//     }
+//     if(SpeedDifference>StandardSpeed){
+//          SpeedDifference = StandardSpeed;
+//     }
+//    
+//     if(LineDistance<-0.5){ //vear right
+//          analogWrite(6, StandardSpeed + SpeedDifference);
+//          analogWrite(5, StandardSpeed - SpeedDifference);
+//     }
+//     else if(LineDistance>+0.5){ //vear left
+//          analogWrite(6, StandardSpeed - SpeedDifference);
+//          analogWrite(5 , StandardSpeed + SpeedDifference);
+//     }
+//     else{
+//     
+//          analogWrite(5, StandardSpeed);
+//          analogWrite(6, StandardSpeed);
+//     }
+//
+//}
+
+void Line_Following() {
+  
      leftForwards();
      rightForwards(); 
      w1 = analogRead(A0);
@@ -11,10 +51,21 @@ void LineFollowing() {
      den= w1 + w2 + w3 + w4;
      LineDistance = num/den;
      SpeedDifference = LineDistance*6;
-     
+     if(LineDistance<-10 || LineDistance> 10){
+      StandardSpeed = 50;
+      StandardSpeedLeft = 70;
+     }
+     else if(LineDistance <-6 || LineDistance > 6){
+      StandardSpeed = 60;
+      StandardSpeedLeft = 80;
+     }
+     else{
+      StandardSpeed = 70; 
+      StandardSpeedLeft = 100;
+      }
      if (den<140){
       unsigned long current_time=millis();
-      timer = current_time + 1000;
+      timer0 = current_time + 1000;
       state = 2;// State is where the fuck is the line function;      
      }
      if(SpeedDifference<0){
@@ -26,34 +77,92 @@ void LineFollowing() {
     
      if(LineDistance>-0.5){ //vear right
           analogWrite(6, StandardSpeed + SpeedDifference);
-          analogWrite(5, StandardSpeed - SpeedDifference);
+          analogWrite(5, StandardSpeedLeft - SpeedDifference);
      }
      else if(LineDistance<+0.5){ //vear left
           analogWrite(6, StandardSpeed - SpeedDifference);
-          analogWrite(5 , StandardSpeed + SpeedDifference);
+          analogWrite(5 , StandardSpeedLeft + SpeedDifference);
      }
      else{
      
-          analogWrite(5, StandardSpeed);
+          analogWrite(5, StandardSpeedLeft);
           analogWrite(6, StandardSpeed);
      }
+     
 
 }
 
-void Wall_to_Turn() {
+void OffTheLine() {
+     
+     leftForwards();
+     rightForwards(); 
+     w1 = analogRead(A0);
+     w2 = analogRead(A1);
+     w3 = analogRead(A2);
+     w4 = analogRead(A3);
+     num=(w1*x1) + (w2*x2) + (w3*x3) + (w4*x4);
+     den= w1 + w2 + w3 + w4;
+     LineDistance = num/den;
+     SpeedDifference = LineDistance*6;
+     if (den>140){
+        state = 1;
+     }
+     if (millis()>timer0){
+        if (den < 140){
+          analogWrite( 5, 0);
+          analogWrite( 6, 0);
+          state = 4;
+        }
+        if (den >140) {
+          state = 1;
+        }
+     }
+     else{
+     if(SpeedDifference>0){
+          SpeedDifference = -SpeedDifference;
+         }
+     if(SpeedDifference>StandardSpeed){
+          SpeedDifference = StandardSpeed;
+         }
+    
+     if(LineDistance>-0.5){ //vear right
+          analogWrite(6, StandardSpeed + SpeedDifference);
+          analogWrite(5, StandardSpeed - SpeedDifference);
+         }
+     else if(LineDistance<+0.5){ //vear left
+          analogWrite(6, StandardSpeed - SpeedDifference);
+          analogWrite(5 , StandardSpeed + SpeedDifference);
+         }
+     else{
+          analogWrite(5, StandardSpeed);
+          analogWrite(6, StandardSpeed);
+         }
+
+     } 
+}
+
+
+
+
+
+
+
+
+
+void TurnorBox() {
+  analogWrite(5,0);
+  analogWrite(6,0);
+  delay (500);
+  myservo.write(0);
+  timer1=millis()+1500;
+  delay(1000);
   
-  analogWrite(5, RestSpeed);
-  analogWrite(6, RestSpeed);
-  delay(800);
-  leftForwards();
-  rightBackwards();
-  analogWrite(5, 100);
-  analogWrite(6, 100);
-  delay(500);
-  analogWrite(5, RestSpeed);
-  analogWrite(6, RestSpeed);
-  delay(100);
-  state = 0;
+  if(sonar_mm() <150){
+   state = 4;
+  }
+  else{
+    state = 11;
+  }
 }
 
 void Gate() {
@@ -119,85 +228,88 @@ void rightBackwards(void) {
 }
 
 unsigned int sonar_mm(void){
-long duration = 0;
-const float speed_sound = 340.29;// m/s, "const" makes the compiler able to optimise
-//... the program where this variable is used, cool!
-// Read in a distance from the ultrasonic distance sensor:
-// The ultrasonic burst is triggered by a HIGH pulse of 10 microseconds.
-digitalWrite(TRIG, HIGH);
-delayMicroseconds(10);
-digitalWrite(TRIG, LOW);
-//read length of time pulse
-duration = pulseIn(ECHO, HIGH); //This function measures a pulsewidth and returns
-//...the width in microseconds
-// convert the time into a distance
-// the code "(unsigned int)" turns the result of the distance calculation
-// into an integer instead of a floating point (decimal or fractional) number.
-return (unsigned int)(0.5 * duration * 1e-6 * speed_sound * 1e3);
-//"unsigned" ensures we are returning an unsigned number, remember that there is no
-//...such thing as negative distance.
+  long duration = 0;
+  const float speed_sound = 340.29;
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+  duration = pulseIn(ECHO, HIGH); 
+  return (unsigned int)(0.5 * duration * 1e-6 * speed_sound * 1e3);
 }
 
-void Where_the_fuck_is_the_line() {
-     
-     leftForwards();
-     rightForwards(); 
-     w1 = analogRead(A0);
-     w2 = analogRead(A1);
-     w3 = analogRead(A2);
-     w4 = analogRead(A3);
-     num=(w1*x1) + (w2*x2) + (w3*x3) + (w4*x4);
-     den= w1 + w2 + w3 + w4;
-     LineDistance = num/den;
-     SpeedDifference = LineDistance*6;
-    // Serial.print("Num: ");
-    // Serial.println(num);
-    // Serial.print("Den: ");
-    //Serial.println(den);
-    // Serial.print("w1 ");
-    // Serial.println(w1);
-   //  Serial.print("w2 ");
-   //  Serial.println(w2);
-   //  Serial.print("w3 ");
-   //  Serial.println(w3);
-   //  Serial.print("w4 ");
-   //  Serial.println(w4);
-     if (den<140 && millis()>timer){
-          state = 4;            
-     }
-     if(SpeedDifference<0){
-          SpeedDifference = -SpeedDifference;
-     }
-     if(SpeedDifference>StandardSpeed){
-          SpeedDifference = StandardSpeed;
-     }
-    
-     if(LineDistance>-0.5){ //vear right
-          analogWrite(6, StandardSpeed + SpeedDifference);
-          analogWrite(5, StandardSpeed - SpeedDifference);
-     }
-     else if(LineDistance<+0.5){ //vear left
-          analogWrite(6, StandardSpeed - SpeedDifference);
-          analogWrite(5 , StandardSpeed + SpeedDifference);
-     }
-     else{
-     
-          analogWrite(5, StandardSpeed);
-          analogWrite(6, StandardSpeed);
-     }
 
+     
+
+void FuckingCorridor() {
+ timer1 = millis()+1200;
+ leftForwards;
+ rightForwards;
+ enc_clear;
+ myservo.write(180);
+ delay(100);
+ myservo.write(0);
+ delay(100);
+ if(sonar_mm()<60){
+    analogWrite(5, 0);
+    analogWrite(6, 0);
+ }
+ while(timer1>millis()){
+  w1 = analogRead(A0);
+  w2 = analogRead(A1);
+  w3 = analogRead(A2);
+  w4 = analogRead(A3);
+  den = w1 + w2 + w3 + w4;
+  if (den >200){
+    state = 1;
+  }
+  analogWrite(5, 100);
+  analogWrite(6, 70);
+  
+ }
+ if(timer1<millis()){
+  state =1;
+ 
+ 
 }
-
-void stoppystate() {
+}
+void teststate() {
 
   leftForwards();
-  rightForwards();
-  analogWrite(6,0);
-  analogWrite(5,0);
+  rightBackwards();
+  analogWrite(6,250);
+  analogWrite(5,250);
 }
 
-
-
-
-
-
+void Wall_to_Turn(){
+ delay(300);
+  myservo.write(90);
+//  
+//  leftForwards();
+//  rightBackwards();
+//  if(timer1>millis()){
+//    analogWrite(5, 80);
+//    analogWrite(6, 80);
+//    delay(400);
+//  }
+//  if(timer1<millis()){
+//    w1 = analogRead(A0);
+//    w2 = analogRead(A1);
+//    w3 = analogRead(A2);
+//    w4 = analogRead(A3);
+//    den = w1 + w2 + w3 + w4;
+//    analogWrite(5, 100);
+//    analogWrite(6, 100);
+//    if (den > 150) {
+//      state = 1;   
+//    }
+//  }
+  analogWrite(5,RestSpeed);
+ analogWrite(6, RestSpeed);
+    delay(1000);
+ leftForwards();
+ rightBackwards();
+ analogWrite(5, 100);
+ analogWrite(6, 100);
+ delay(700);
+  state = 1;
+}
