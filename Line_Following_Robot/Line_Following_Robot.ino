@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <SparkFun_APDS9960.h>
 #include <ENGG1500Lib.h>
+#include <Servo.h>
 
  /*
  State 0 = Line Following
@@ -17,6 +18,9 @@
 #define RightMotor 6
 #define ECHO 12
 #define TRIG 7
+//Intisalise Servo
+Servo myservo;
+int servopos = 90;
 
 //Line Following Variables
 float x1 = -22.5;
@@ -30,20 +34,28 @@ float w4;
 float LineDistance;
 unsigned int distance_mm;
 int StandardSpeed = 80;
+int StandardSpeedLeft;
 int SpeedDifference = 0;
 int RestSpeed = 0;
 float den;
 float num;
+// average of sonar values
+const int numReadings = 10;
+int readings[numReadings];      // the readings from the analog input
+int readIndex = 0;              // the index of the current reading
+int total = 0;                  // the running total
+int average_distance = 0;                // the average
 
 //Misc Variables
-unsigned long timer;
-int state = 0;
+unsigned long timer0;
+unsigned long timer1;
+int state = 1;
 
 //RGB Sensor Variables
 SparkFun_APDS9960 apds = SparkFun_APDS9960();
 uint16_t ambient_light = 0;
 uint16_t red_light = 0;
-uint16_t green_light = 0;
+  uint16_t green_light = 0;
 uint16_t blue_light = 0;
 
 void setup() {
@@ -66,10 +78,9 @@ void setup() {
      //Ultrasonic Sensor
      pinMode(ECHO, INPUT); 
      pinMode(TRIG, OUTPUT);
-
+    
      //Servo 
-     //pinMode();
-     //pinMode();
+     myservo.attach(4);
 
      //RGB Sensor
      //pinMode();
@@ -88,37 +99,49 @@ void setup() {
      }*/
      
      Serial.begin(9600);
+     //average of sonar readings
+     for (int thisReading = 0; thisReading < numReadings; thisReading++) {
+      readings[thisReading] = 0;
+     }
      delay(2000); //gives time for things to setup
 }
-void loop() { 
+void loop() {
+start:
 
-distance_mm = sonar_mm();
-
-  /*if(distance_mm < 50){
+//  Serial.print("State: ");
+//  Serial.println(state);
+ Serial.print("Sonar: ");
+  Serial.println(sonar_mm());
+  if(sonar_mm()<120 && millis()>3000){
+    if ( state != 10 || state != 11 || state != 4){
     analogWrite(5,0);
     analogWrite(6,0);
     //delay(5000);
-    state = 1;
-  }*/
+    state = 10;
+    }
+    else{ goto start;}
+  }
   if(red_light >= 200) {
     state = 7;
   }
-  if(state == 0){
-    LineFollowing();
+  if(state == 1){
+    Line_Following();
   }
-  if ( state == 1){
+  if (state == 10){
+    TurnorBox();
+  }
+  if ( state == 11){
     Wall_to_Turn();
   }
   if(state == 2){
-    Where_the_fuck_is_the_line();
+    OffTheLine();
   }
-  if (state == 4){
-    stoppystate();
+  if (state == 12){
+    FuckingCorridor();
   }
   if (state == 7) {
     Gate();
   }
+
   
 }
-
-
